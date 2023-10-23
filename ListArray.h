@@ -8,88 +8,119 @@ template <typename T>
 
 class ListArray : public List<T>{
 private:
-	static const int MINSIZE = 2;
-	vector<T> arr[MINSIZE];;
-	vector<T> arr_aux[MINSIZE];
-	int max; //tamaño actual del array
-	int n; //numero de elementos que contiene la lista
-	
-	void resize(int new_size){
-		arr.resize(new_size);
-	}
-	
+        T* arr;
+        int max; //tamaño actual del array
+        int n; //número de elementos de la lista
+        static const int MINSIZE = 2;
+        void resize(int new_size){
+               T arr_aux[new_size];
+                for(int i = 0; i < n; i++)
+                        arr_aux[i] = arr[i];
+
+                delete[] arr; //liberamos el espacio de memoria de arr, para el nuevo array.
+
+                arr = new int[new_size];
+                for(int j = 0; j < new_size; j++)
+                        arr[j] = arr_aux[j];
+
+                max = new_size; //nuevo tamaño de arr
+        }
 public:
-	ListArray(){
-		max = 2;
-		n = 0;
-	}	
-	~ListArray(){
-		delete[] arr;
+        ListArray(){
+                arr = new int[MINSIZE];
+                max = 2;
+                n = 0;
+        }
+        ~ListArray(){
+                delete[] arr;
+        }
+
+        T operator[](int pos){
+                if(pos < 0 || pos > max - 1)
+                        throw out_of_range("Numero introducido fuera de rango");
+                else
+                        return arr[pos];
+        }
+        friend ostream& operator<<(ostream &out, const ListArray<T> &list){
+		out << "List -> [";
+		for(int i = 0; i < list.n; i++)
+			out << list.arr[i] << ",  ";
+
+		out << "]";
+		return out;
 	}
-
-	T operator[](int pos){
-		if(pos < 0 || pos > arr.size() - 1)
-			throw out_of_range("Numero introducido fuera de rango");		
-		else
-		 	return arr[pos];
-	}
-
-	//friend ostream& operator<<(ostream &out, const ListArray<T> &list){
-
+	
 	virtual void insert(int pos, T e) override{
-		if(pos < 0 || pos > arr.size())
-			throw out_of_range("La posición está fuera del intervalo permitido");				//tres casos posibles
-		if(pos == 0) //prepend
-			prepend(e);
-		else if(pos == n)//append
-			append(e);
-		else
-			arr.insert(arr.begin() + pos, e);
-	}
+                if(pos < 0 || pos > max - 1)
+                        throw out_of_range("La posición está fuera del intervalo permitido");
+                //tres casos posibles
+                if(pos == 0) //prepend
+                        prepend(e);
+                else if(pos == max - 1)//append
+                        append(e);
+                else{	
+			resize(max + 1);
+                 	for(int i = pos; i < max - 1; i++){
+				arr[i] = arr[i + 1];
+			}
+			arr[pos] = e;
+			n++;
+                }
+        }
 
-	virtual void append(T e)override{
-		arr.push_back(e); //funcion que inserta elemento al final de la lista
+        virtual void append(T e)override{
+		resize(max + 1);
+		arr[max - 1] = e;
+		n++;
 	}
 
 	virtual void prepend(T e)override{
-		arr.insert(arr.begin(), e);
+		resize(max + 1);
+		for(int i = 0; i < max - 1; i++){
+			arr[i] = arr[i + 1];
+		}
+		arr[0] = e;
+		n++;
 	}
 
 	virtual T remove(int pos)override{
-		if(pos < 0 || pos > arr.size())
+		if(pos < 0 || pos > max - 1)
                         throw out_of_range("La posición está fuera del intervalo permitido");
-		vector<T> aux[1];
-		aux[1] = arr[pos];
-		arr.erase(arr.begin() + pos);
-
-		return aux[1];
+		else{
+			T aux[1]; 
+			aux[1] = arr[pos];
+			for(int i = pos; i < max - 1; i++){
+				arr[i] = arr[i + 1];
+			}
+			n--;
+			return aux[1];	
+		}
 	}
 
 	virtual T get(int pos)override{
-		if(pos < 0 || pos > arr.size())
-                        throw out_of_range("La posición está fuera del intervalo permitido");
-
-		return pos;
+		if(pos < 0 || pos > max - 1)
+			throw out_of_range("La posición está fuera del intérvalo permitido");
+		else
+			return arr[pos];
 	}
-	
+
 	virtual int search(T e)override{
-		for(int i = 0; i < arr.size(); i++){
+		for(int i = 0; i < max - 1; i++){
 			if(arr[i] = e)
 				return i;
 		}
-		return -1; //Si ha llegado a este return es que no ha encontrado el elemento e
+		return -1;
 	}
 
 	virtual bool empty()override{
-		if(arr.size() == 0)
+		if(size() == 0)
 			return true;
 		else
 			return false;
 	}
 
 	virtual int size()override{
-		return arr.size();
+		return n;
 	}
-
-
 };
+

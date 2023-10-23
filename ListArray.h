@@ -13,16 +13,14 @@ private:
         int n; //número de elementos de la lista
         static const int MINSIZE = 2;
         void resize(int new_size){
-               T arr_aux[new_size];
-                for(int i = 0; i < n; i++)
+                T* arr_aux = new T[new_size];
+                for(int i = 0; i < max; i++)
                         arr_aux[i] = arr[i];
 
                 delete[] arr; //liberamos el espacio de memoria de arr, para el nuevo array.
-
-                arr = new int[new_size];
-                for(int j = 0; j < new_size; j++)
-                        arr[j] = arr_aux[j];
-
+		
+		arr = arr_aux;
+         
                 max = new_size; //nuevo tamaño de arr
         }
 public:
@@ -44,23 +42,27 @@ public:
         friend ostream& operator<<(ostream &out, const ListArray<T> &list){
 		out << "List -> [";
 		for(int i = 0; i < list.n; i++)
-			out << list.arr[i] << ",  ";
+			out << list.arr[i] << "  ";
 
 		out << "]";
 		return out;
 	}
 	
 	virtual void insert(int pos, T e) override{
-                if(pos < 0 || pos > max - 1)
+		if(pos < 0 || pos > max - 1)
                         throw out_of_range("La posición está fuera del intervalo permitido");
-                //tres casos posibles
+                
+		if(size() == max)
+			resize(max + 1);
+
+		//tres casos posibles
                 if(pos == 0) //prepend
                         prepend(e);
                 else if(pos == max - 1)//append
                         append(e);
                 else{	
 			resize(max + 1);
-                 	for(int i = pos; i < max - 1; i++){
+			for(int i = pos; i < max; i++){
 				arr[i] = arr[i + 1];
 			}
 			arr[pos] = e;
@@ -76,7 +78,7 @@ public:
 
 	virtual void prepend(T e)override{
 		resize(max + 1);
-		for(int i = 0; i < max - 1; i++){
+		for(int i = 0; i < max; i++){
 			arr[i] = arr[i + 1];
 		}
 		arr[0] = e;
@@ -86,14 +88,22 @@ public:
 	virtual T remove(int pos)override{
 		if(pos < 0 || pos > max - 1)
                         throw out_of_range("La posición está fuera del intervalo permitido");
-		else{
-			T aux[1]; 
-			aux[1] = arr[pos];
-			for(int i = pos; i < max - 1; i++){
-				arr[i] = arr[i + 1];
+		else{	
+			if(pos == max - 1){
+				T aux = arr[pos];
+				resize(max - 1);
+				n--;
+				return aux;
 			}
-			n--;
-			return aux[1];	
+			else{
+				T aux = arr[pos];
+				for(int i = pos; i < max - 1; i++)
+					arr[i] = arr[i + 1];
+
+				resize(max - 1);
+				n--;
+				return aux;
+			}	
 		}
 	}
 
@@ -105,8 +115,8 @@ public:
 	}
 
 	virtual int search(T e)override{
-		for(int i = 0; i < max - 1; i++){
-			if(arr[i] = e)
+		for(int i = 0; i < max; i++){
+			if(arr[i] == e)
 				return i;
 		}
 		return -1;

@@ -1,7 +1,6 @@
 #include <iostream>
 #include "List.h"
 #include "ListLinked.h"
-//#include "Node.h"
 #include <vector>
 
 int main(){
@@ -41,8 +40,8 @@ int main(){
     std::cout << "empty(): " << list.empty() << std::endl; 
     std::cout << std::endl; 
    
-    list.prepend(14);
-    list.append(33);
+    list.append(14);
+    list.prepend(33);
     std::cout << list << std::endl; 
     std::cout << "size(): " << list.size() << std::endl; 
     std::cout << "empty(): " << list.empty() << std::endl; 
